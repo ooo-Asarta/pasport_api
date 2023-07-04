@@ -2,6 +2,7 @@ import requests
 import io
 import urllib
 
+
 def download_and_convert_to_bytesio(url: str) -> io.BytesIO:
     """
     Скачивает файл по указанному URL и преобразует его в объект io.BytesIO.
@@ -23,10 +24,13 @@ def download_and_convert_to_bytesio(url: str) -> io.BytesIO:
         return file_bytes
 
     except requests.exceptions.RequestException as e:
+        logger.error(f"Не удалось загрузить файл: {str(e)}")
         raise Exception(f"Не удалось загрузить файл: {str(e)}")
 
     except Exception as e:
+        logger.error(f"Произошла ошибка: {str(e)}")
         raise Exception(f"Произошла ошибка: {str(e)}")
+
 
 def decode_image_url(url: str) -> str:
     """
@@ -45,4 +49,5 @@ def decode_image_url(url: str) -> str:
         decoded_url = urllib.parse.unquote(url)
         return decoded_url
     except Exception as e:
+        logger.error(f"Ошибка при декодировании URL изображения: {str(e)}")
         raise Exception(f"Ошибка при декодировании URL изображения: {str(e)}")

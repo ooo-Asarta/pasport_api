@@ -2,7 +2,9 @@ from fastapi.security import APIKeyQuery
 from config import SECURITY_KEY
 from fastapi import Depends
 
+
 api_key_query = APIKeyQuery(name='key', auto_error=False)
+
 
 def check_api_key(api_key: str = Depends(api_key_query)):
     # Здесь вы можете добавить логику проверки ключа доступа
