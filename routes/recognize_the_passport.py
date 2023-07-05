@@ -8,6 +8,7 @@ from models import Passport
 from security import check_api_key
 from utils import decode_image_url, download_and_convert_to_bytesio
 from vision.yandex_vision import YandexVision, YandexDecoder
+from logger import logger
 
 router = APIRouter()
 yandex_oauth_token = config.YANDEX_OAUTH_TOKEN
