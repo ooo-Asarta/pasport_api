@@ -13,7 +13,8 @@ class YandexDecoder:
         if response.status_code == 200:
             results = YandexDecoder._parse_precognize_passport_response(
                 response)
-            passport = YandexDecoder._create_passport_from_data(results)
+            passport_data = YandexDecoder._create_passport_data(results)
+            passport = YandexDecoder._create_passport(passport_data)
             return passport
         else:
             logger.error(
@@ -28,7 +29,7 @@ class YandexDecoder:
         return results
 
     @staticmethod
-    def _create_passport_from_data(data) -> Optional[Passport]:
+    def _create_passport_data(data) -> Optional[Passport]:
         required_fields = [
             'name', 'middle_name', 'surname', 'gender', 'birth_date',
             'birth_place', 'number', 'issued_by', 'issue_date', 'subdivision'
@@ -38,12 +39,25 @@ class YandexDecoder:
         for entity in data:
             if entity['name'] in required_fields:
                 passport_data[entity['name']] = entity['text']
-
-        if len(passport_data) == len(required_fields):
-            passport = Passport(**passport_data)
-            return passport
-
-        raise ValueError('Invalid passport data. Missing required fields.')
+        return passport_data
+    def _create_passport(data):
+        passport_series = data['number'][:4]  # Первые 4 цифры номера - это серия паспорта
+        passport_number = data['number'][4:]  # Остальные цифры номера - это номер паспорта
+    
+        full_name = f"{data['surname']} {data['name']} {data['middle_name']}"
+    
+        passport_data = {
+            'passport_series': passport_series,
+            'passport_number': passport_number,
+            'passport_issued_by': data['issued_by'],
+            'passport_issued_on': data['issue_date'],
+            'full_name': full_name,
+            'date_of_birth': data['birth_date']
+        }
+    
+        passport = Passport(**passport_data)
+        return passport
+    
 
 
 class YandexVision:
