@@ -4,7 +4,7 @@ import json
 import base64
 from typing import Optional
 from models import Passport
-
+from logger import logger
 
 class YandexDecoder:
 

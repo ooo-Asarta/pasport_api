@@ -2,6 +2,7 @@ import requests
 import io
 import urllib
 
+from logger import logger
 
 def download_and_convert_to_bytesio(url: str) -> io.BytesIO:
     """

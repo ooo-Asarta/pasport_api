@@ -3,7 +3,7 @@ import io
 import json
 from models import Passport
 from typing import Dict, List
-
+from logger import logger
 
 class VkDecoder:
     @classmethod
