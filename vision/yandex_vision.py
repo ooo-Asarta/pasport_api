@@ -14,8 +14,7 @@ class YandexDecoder:
             results = YandexDecoder._parse_precognize_passport_response(
                 response)
             passport_data = YandexDecoder._create_passport_data(results)
-            passport = YandexDecoder._create_passport(passport_data)
-            return passport
+            return  YandexDecoder._create_passport(passport_data)
         else:
             logger.error(
                 f"Request failed with status code: {response.status_code}")
@@ -24,9 +23,14 @@ class YandexDecoder:
 
     @staticmethod
     def _parse_precognize_passport_response(response) -> dict:
-        response_json = response.json()
-        results = response_json['results'][0]['results'][0]['textDetection']['pages'][0]['entities']
-        return results
+        try:
+            response_json = response.json()
+            results = response_json['results'][0]['results'][0]['textDetection']['pages'][0]['entities']
+            return results
+        except Exception as e:
+            logger.error(
+                f"Не удалось распознать паспорт")
+            raise Exception (f"Не удалось распознать паспорт")
 
     @staticmethod
     def _create_passport_data(data) -> Optional[Passport]:
@@ -53,10 +57,8 @@ class YandexDecoder:
             'passport_issued_on': data['issue_date'],
             'full_name': full_name,
             'date_of_birth': data['birth_date']
-        }
-    
-        passport = Passport(**passport_data)
-        return passport
+        } 
+        return Passport(**passport_data)
     
 
 

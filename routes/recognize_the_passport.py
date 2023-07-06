@@ -1,12 +1,12 @@
 import io
 import requests
 
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query
 
 import config
 from models import Passport, RecognitionResult
 from security import check_api_key
-from utils import decode_image_url, download_and_convert_to_bytesio
+from utils import decode_image_url, download_image, convert_to_bytesio
 from vision.yandex_vision import YandexVision, YandexDecoder
 from logger import logger
 
@@ -24,37 +24,48 @@ def recognize_the_passport(
     is_authorized: bool = Depends(check_api_key)
 ):
     if not is_authorized:
-        logger.warning("Несанкционированный запрос")
-        raise HTTPException(status_code=401, detail="Не авторизован")
-
+        logger.warning("Не валидный токен авторизации")
+        return RecognitionResult(status='ok', result=f"Несанкционированный запрос")
+    
     try:
         url: str = decode_image_url(image)
-        file_bytes_io: io.BytesIO = download_and_convert_to_bytesio(url)
     except Exception as e:
-        logger.error(f"Ошибка обработки изображения: {str(e)}")
-        raise RecognitionResult(status="error", result=str(e))
+        logger.error(f"Не удалось получить ссылку на файл, или ссылка указана некоректно: {str(e)}")
+        return RecognitionResult(status='ok', result=f"Не удалось получить ссылку на файл, или ссылка указана некоректно: {str(e)}")
+    
+    try:
+        image: requests.Request = download_image(url)
+    except Exception as e:
+        logger.error(f"Ошибка при скачивании изображения: {str(e)}")
+        return RecognitionResult(status='ok', result=f"Ошибка обработки изображения: {str(e)}")
 
-
+    try:
+        file_bytes_io: io.IOBase = convert_to_bytesio (image)
+    except Exception as e:
+        logger.error(f"Ошибка конвертации в io.IOBase: {str(e)}")
+        return RecognitionResult(status='ok', result=f"Ошибка обработки изображения: {str(e)}")    
+    
+    
     try:
         yandex_vision = YandexVision(
             oauth_token=yandex_oauth_token, folder_id=yandex_folder_id)
     except Exception as e:
         logger.error(f"Ошибка при создании экземпляра YandexVision: {str(e)}")
-        raise RecognitionResult(status="error", result=str(e))
-
+        return RecognitionResult(status='ok', result=f"Ошибка при создании экземпляра YandexVision: {str(e)}")
+    
     try:
         recognize_yandex_data: requests.Response = yandex_vision.recognize_the_passport(
             file_bytes_io)
     except Exception as e:
         logger.error(f"Ошибка распознавания паспорта: {str(e)}")
-        raise RecognitionResult(status="error", result=str(e))
-
+        return RecognitionResult(status='ok', result=f"Ошибка распознавания паспорта: {str(e)}")
+    
     try:
         yandex_result_passport: Passport = YandexDecoder.expand_it_into_a_passport_model(
             recognize_yandex_data)
     except Exception as e:
         logger.error(f"Ошибка декодирования данных паспорта: {str(e)}")
-        raise RecognitionResult(status="error", result=str(e))
+        return RecognitionResult(status='ok', result=f"Ошибка декодирования данных паспорта: {str(e)}")
 
 
-    raise {"status": "ок", "result": yandex_result_passport}
+    return RecognitionResult(status='ok', result=yandex_result_passport)

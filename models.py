@@ -45,3 +45,4 @@ class Passport(BaseModel):
 class RecognitionResult(BaseModel):
     status: str
     result: Union[str, Passport]
+
