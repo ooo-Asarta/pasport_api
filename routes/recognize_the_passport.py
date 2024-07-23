@@ -15,9 +15,7 @@ yandex_oauth_token = config.YANDEX_OAUTH_TOKEN
 yandex_folder_id = config.YANDEX_FOLDER_ID
 
 
-@router.get("/recognize_the_passport/",
-            response_model=RecognitionResult,
-            summary="Распознать паспорт")
+@router.post("/recognize_the_passport/", response_model=RecognitionResult, summary="Распознать паспорт")
 def recognize_the_passport(
     image: str = Query(..., description="URL-адрес изображения или Base64"),
     key: str = Query(..., description="Токен авторизации"),
