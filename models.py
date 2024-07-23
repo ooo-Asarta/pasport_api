@@ -15,7 +15,7 @@ class Passport(BaseModel):
     full_name: str
     date_of_birth: str
 
-    @field_validator('passport_issued_on', 'date_of_birth', pre=True)
+    @field_validator('passport_issued_on', 'date_of_birth', mode="before")
     def validate_date_format(cls, value):
         """
         Валидатор для проверки формата даты.
