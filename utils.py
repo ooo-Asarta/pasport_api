@@ -4,6 +4,7 @@ import urllib
 
 from logger import logger
 
+
 def download_image(url: str) -> requests.Response:
     """
     Скачивает файл по указанному URL и преобразует его в объект io.BytesIO.
@@ -35,8 +36,6 @@ def convert_to_bytesio(response: requests.Response) -> io.BytesIO:
     except Exception as e:
         logger.error(f"Произошла ошибка: {str(e)}")
         raise Exception(f"Произошла ошибка: {str(e)}")
-
-    
 
 
 def decode_image_url(url: str) -> str:

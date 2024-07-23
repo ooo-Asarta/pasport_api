@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import Union
-from pydantic import BaseModel, validator
+from pydantic.v1 import validator
+from pydantic import BaseModel
+
 
 class Passport(BaseModel):
     """
@@ -42,7 +44,7 @@ class Passport(BaseModel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+
 class RecognitionResult(BaseModel):
     status: str
     result: Union[str, Passport]
-
