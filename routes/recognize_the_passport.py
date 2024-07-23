@@ -1,7 +1,7 @@
 import io
 import requests
 
-from fastapi import APIRouter, Depends, Body
+from fastapi import APIRouter, Depends, Query
 
 import config
 from models import Passport, RecognitionResult
@@ -17,8 +17,8 @@ yandex_folder_id = config.YANDEX_FOLDER_ID
 
 @router.post("/recognize_the_passport/", response_model=RecognitionResult, summary="Распознать паспорт")
 def recognize_the_passport(
-    image: str = Body(..., description="URL-адрес изображения или Base64"),
-    key: str = Body(..., description="Токен авторизации"),
+    image: str = Query(..., description="URL-адрес изображения или Base64"),
+    key: str = Query(..., description="Токен авторизации"),
     is_authorized: bool = Depends(check_api_key)
 ):
     if not is_authorized:
