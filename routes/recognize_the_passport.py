@@ -17,8 +17,8 @@ yandex_folder_id = config.YANDEX_FOLDER_ID
 
 @router.post("/recognize_the_passport/", response_model=RecognitionResult, summary="Распознать паспорт")
 def recognize_the_passport(
-    image: str = Query(..., description="URL-адрес изображения или Base64", max_length=1000000),
     key: str = Query(..., description="Токен авторизации"),
+    image: str = Query(..., description="URL-адрес изображения или Base64", max_length=1000000),
     is_authorized: bool = Depends(check_api_key)
 ):
     if not is_authorized:
