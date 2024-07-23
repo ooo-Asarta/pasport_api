@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import Union
-from pydantic.v1 import validator
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 
 class Passport(BaseModel):
@@ -16,7 +15,7 @@ class Passport(BaseModel):
     full_name: str
     date_of_birth: str
 
-    @validator('passport_issued_on', 'date_of_birth', pre=True)
+    @field_validator('passport_issued_on', 'date_of_birth', pre=True)
     def validate_date_format(cls, value):
         """
         Валидатор для проверки формата даты.
@@ -31,7 +30,7 @@ class Passport(BaseModel):
         except ValueError:
             raise ValueError('Неверный формат даты. Пожалуйста, используйте формат dd.mm.yyyy.')
 
-    @validator('full_name')
+    @field_validator('full_name')
     def capitalize_full_name(cls, value):
         """
         Преобразует поле full_name так, чтобы каждое слово начиналось с заглавной буквы.
