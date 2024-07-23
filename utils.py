@@ -1,6 +1,7 @@
 import requests
 import io
 import urllib
+import base64
 
 from logger import logger
 
@@ -57,3 +58,10 @@ def decode_image_url(url: str) -> str:
     except Exception as e:
         logger.error(f"Ошибка при декодировании URL изображения: {str(e)}")
         raise Exception(f"Ошибка при декодировании URL изображения: {str(e)}")
+
+
+def base64_to_bytesio(base64_data: str):
+    image_data = base64_data.encode()
+    image_bytes = base64.b64decode(image_data)
+
+    return io.BytesIO(image_bytes)
