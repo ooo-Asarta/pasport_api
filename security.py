@@ -4,7 +4,7 @@ from fastapi import Depends
 from logger import logger
 
 
-api_key_query = APIKeyQuery(name='key', auto_error=False)
+api_key_query = APIKeyQuery(name='key', auto_error=True)
 
 
 def check_api_key(api_key: str = Depends(api_key_query)):
