@@ -77,7 +77,7 @@ def recognize_the_passport(
     return RecognitionResult(status='ok', result=yandex_result_passport)
 
 
-@router.post("/recognize_the_passport_post/", response_model=RecognitionResult, summary="Распознать паспорт")
+@router.post("/recognize_the_passport/", response_model=RecognitionResult, summary="Распознать паспорт")
 def recognize_the_passport_post(
     key: str = Body(..., description="Токен авторизации"),
     image: str = Body(..., description="URL-адрес изображения или Base64", max_length=1000000),
