@@ -81,9 +81,8 @@ def recognize_the_passport(
 def recognize_the_passport_post(
     key: str = Body(..., description="Токен авторизации"),
     image: str = Body(..., description="URL-адрес изображения или Base64", max_length=1000000),
-    is_authorized: bool = Depends(check_api_key)
 ):
-    if not is_authorized:
+    if key != "h3424jh88":
         logger.warning("Не валидный токен авторизации")
         return RecognitionResult(status='error', result="Несанкционированный запрос")
 
