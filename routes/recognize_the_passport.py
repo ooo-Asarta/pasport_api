@@ -1,7 +1,7 @@
 import io
 import requests
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Body
 
 import config
 from models import Passport, RecognitionResult
@@ -15,10 +15,72 @@ yandex_oauth_token = config.YANDEX_OAUTH_TOKEN
 yandex_folder_id = config.YANDEX_FOLDER_ID
 
 
-@router.post("/recognize_the_passport/", response_model=RecognitionResult, summary="Распознать паспорт")
+@router.get("/recognize_the_passport/", response_model=RecognitionResult, summary="Распознать паспорт")
 def recognize_the_passport(
     key: str = Query(..., description="Токен авторизации"),
     image: str = Query(..., description="URL-адрес изображения или Base64", max_length=1000000),
+    is_authorized: bool = Depends(check_api_key)
+):
+    if not is_authorized:
+        logger.warning("Не валидный токен авторизации")
+        return RecognitionResult(status='error', result="Несанкционированный запрос")
+
+    file_bytes_io = None
+
+    if "base64" in image:
+        image_base64 = image.split(",")[1]
+
+        file_bytes_io = base64_to_bytesio(image_base64)
+    else:
+        try:
+            url: str = decode_image_url(image)
+        except Exception as e:
+            logger.error(f"Не удалось получить ссылку на файл, или ссылка указана некорректно: {str(e)}")
+            return RecognitionResult(
+                status='error',
+                result=f"Не удалось получить ссылку на файл, или ссылка указана некорректно: {str(e)}"
+            )
+
+        try:
+            image: requests.Request = download_image(url)
+        except Exception as e:
+            logger.error(f"Ошибка при скачивании изображения: {str(e)}")
+            return RecognitionResult(status='error', result=f"Ошибка обработки изображения: {str(e)}")
+
+        try:
+            file_bytes_io: io.IOBase = convert_to_bytesio(image)
+        except Exception as e:
+            logger.error(f"Ошибка конвертации в io.IOBase: {str(e)}")
+            return RecognitionResult(status='error', result=f"Ошибка обработки изображения: {str(e)}")
+
+    try:
+        yandex_vision = YandexVision(
+            oauth_token=yandex_oauth_token, folder_id=yandex_folder_id)
+    except Exception as e:
+        logger.error(f"Ошибка при создании экземпляра YandexVision: {str(e)}")
+        return RecognitionResult(status='error', result=f"Ошибка при создании экземпляра YandexVision: {str(e)}")
+
+    try:
+        recognize_yandex_data: requests.Response = yandex_vision.recognize_the_passport(
+            file_bytes_io)
+    except Exception as e:
+        logger.error(f"Ошибка распознавания паспорта: {str(e)}")
+        return RecognitionResult(status='error', result=f"Ошибка распознавания паспорта: {str(e)}")
+
+    try:
+        yandex_result_passport: Passport = YandexDecoder.expand_it_into_a_passport_model(
+            recognize_yandex_data)
+    except Exception as e:
+        logger.error(f"Ошибка декодирования данных паспорта: {str(e)}")
+        return RecognitionResult(status='error', result=f"Ошибка декодирования данных паспорта: {str(e)}")
+
+    return RecognitionResult(status='ok', result=yandex_result_passport)
+
+
+@router.post("/recognize_the_passport_post/", response_model=RecognitionResult, summary="Распознать паспорт")
+def recognize_the_passport_post(
+    key: str = Body(..., description="Токен авторизации"),
+    image: str = Body(..., description="URL-адрес изображения или Base64", max_length=1000000),
     is_authorized: bool = Depends(check_api_key)
 ):
     if not is_authorized:
