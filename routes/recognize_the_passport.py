@@ -32,17 +32,17 @@ def recognize_the_passport(
 
         file_bytes_io = base64_to_bytesio(image_base64)
     else:
-        try:
-            url: str = decode_image_url(image)
-        except Exception as e:
-            logger.error(f"Не удалось получить ссылку на файл, или ссылка указана некорректно: {str(e)}")
-            return RecognitionResult(
-                status='error',
-                result=f"Не удалось получить ссылку на файл, или ссылка указана некорректно: {str(e)}"
-            )
+        # try:
+        #     url: str = decode_image_url(image)
+        # except Exception as e:
+        #     logger.error(f"Не удалось получить ссылку на файл, или ссылка указана некорректно: {str(e)}")
+        #     return RecognitionResult(
+        #         status='error',
+        #         result=f"Не удалось получить ссылку на файл, или ссылка указана некорректно: {str(e)}"
+        #     )
 
         try:
-            image: requests.Request = download_image(url)
+            image: requests.Request = download_image(image)
         except Exception as e:
             logger.error(f"Ошибка при скачивании изображения: {str(e)}")
             return RecognitionResult(status='error', result=f"Ошибка обработки изображения: {str(e)}")
