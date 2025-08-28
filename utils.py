@@ -20,7 +20,11 @@ def download_image(url: str) -> requests.Response:
         Exception: Если файл не удается загрузить или происходит ошибка.
     """
     try:
-        response = requests.get(url)
+        response = requests.get(
+            url,
+            verify=False,
+            stream=True
+        )
         response.raise_for_status()  # Проверка статуса ответа
 
         return response
